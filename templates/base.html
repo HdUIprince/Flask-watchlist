@@ -4,7 +4,11 @@
         {% block head %}
         <meta charset="utf-8" />
         <meta name='viewport', content='width-device-width, initial-scale=1.0'>
+        {% if current_user.is_authenticated %}
+        <title>{{ user.username }}'s Watchlist</title>
+        {% else %}
         <title>{{ user.name }}'s Watchlist</title>
+        {% endif %}
         <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='style.css')}}" type='text/css'>
         {% endblock %}
@@ -17,13 +21,21 @@
 
         <h2>
             <img src="{{ url_for('static', filename='images/avatar.png') }}" class='avatar' alt="Avatar">
-            {{ user.name }}'s Watchlist
+            {% if current_user.is_authenticated %}
+            {{ user.username }}'s Watchlist
+            {% else %}
+            Watchlist
+            {% endif %}
         </h2>
         <nav>
             <ul class='movie-list'>
-                <li>
-                    <a href="{{ url_for('index') }}"> Home </a>
-                </li>
+                <li> <a href="{{ url_for('index') }}"> Home </a> </li>
+                {% if current_user.is_authenticated %}
+                <li> <a href="{{ url_for('settings') }}">Settings</a></li>
+                <li> <a href="{{ url_for('logout') }}">Logout</a></li>
+                {% else %}
+                <li> <a href="{{ url_for('login') }}">Login</a></li>
+                {% endif %}
             </ul> 
         </nav>
 
