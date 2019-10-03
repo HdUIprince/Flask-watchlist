@@ -20,6 +20,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # 关闭对模型修改的
 # 加载配置
 db = SQLAlchemy(app)  # 初始化扩展，传入程序实例 app
 
+
 @app.cli.command()  # 注册为命令
 @click.option('--drop', is_flag=True, help='Create after drop.')  # 设置选项
 def initdb(drop):
@@ -30,6 +31,7 @@ def initdb(drop):
         db.drop_all()
     db.create_all()
     click.echo('Initialized database.')  # 输出提示信息
+
 
 @app.cli.command()
 def forge():
@@ -58,7 +60,7 @@ def forge():
     for m in movies:
         movie = Movie(title=m['title'], year=m['year'])
         db.session.add(movie)
-    
+
     db.session.commit()
     click.echo('Done.')
 
@@ -74,29 +76,19 @@ class Movie(db.Model):
     year = db.Column(db.String(4))    # 电影年份
 
 
-@app.route('/')
-# @app.route('/home')
-# @app.route('/index')
-def index():
-    # return 'Welcome to My watchlist!'
-    # return u'欢迎来到我的Watchlist!'
-    # return '<h1>Hello Totoro!</h1><img src="http://helloflask.com/totoro.gif">'
+@app.context_processor
+def inject_user():
     user = User.query.first()
+    return dict(user=user)
+
+@app.route('/')
+def index():
+    # user = User.query.first()
     movies = Movie.query.all()
-    return render_template('index.html', user=user, movies=movies)
+    return render_template('index.html', movies=movies)
 
 
-@app.route('/user/<name>')
-def user_page(name):
-    return f'<h1>User {name}</h1>'
+@app.errorhandler(404)  # 传入要处理的错误代码
+def page_not_found(e):  # 接受异常对象作为参数
+    return render_template('404.html'), 404  # 返回模板和状态码
 
-
-# @app.route('/test')
-# def test_url_for():
-#     # get relate URL
-#     print(url_for('hello'))
-#     print(url_for('user_page', name='greyli'))
-#     print(url_for('user_page', name='peter'))
-#     print(url_for('test_url_for'))
-#     print(url_for('test_url_for', num=2))
-#     return 'Test Page'
